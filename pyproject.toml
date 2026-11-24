@@ -7,6 +7,8 @@ name = "onetips"
 version = "0.1.0.dev0"
 description = "Create, validate, and query OneTips Markdown tips packaged as Agent Skills."
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.12"
 dependencies = ["PyYAML>=6.0.2,<7", "markdown-it-py>=4,<5"]
 
