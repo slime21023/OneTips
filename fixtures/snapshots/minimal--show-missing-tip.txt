@@ -1,0 +1,4 @@
+exit=1
+--- stdout ---
+--- stderr ---
+onetips: <ROOT>/minimal/skills/acme-tips/INDEX.md: no indexed Tip 'absent-tip'

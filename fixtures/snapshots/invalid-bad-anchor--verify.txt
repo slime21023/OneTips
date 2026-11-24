@@ -1,0 +1,5 @@
+exit=1
+--- stdout ---
+--- stderr ---
+<ROOT>/invalid-bad-anchor/skills/acme-tips/references/retry-with-backoff.md:16: E-LINK-ANCHOR unknown anchor: idempotency-keys.md#not-a-heading
+1 errors, 0 warnings

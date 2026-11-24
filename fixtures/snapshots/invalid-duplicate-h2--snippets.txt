@@ -1,0 +1,5 @@
+exit=1
+--- stdout ---
+--- stderr ---
+<ROOT>/invalid-duplicate-h2/skills/acme-tips/references/retry-with-backoff.md:36: E-SECTION-DUPLICATE duplicate section 'Pitfalls'
+1 errors, 0 warnings

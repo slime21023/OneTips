@@ -1,0 +1,5 @@
+exit=1
+--- stdout ---
+--- stderr ---
+<ROOT>/invalid-escaping-link/skills/acme-tips/references/retry-with-backoff.md:16: E-LINK-ESCAPES-SKILL link leaves its scope: ../../../missing.md
+1 errors, 0 warnings

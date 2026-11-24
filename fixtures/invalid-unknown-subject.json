@@ -1,0 +1,7 @@
+{
+  "path": "skills/acme-tips/references/retry-with-backoff.md",
+  "before": "  acme-sdk:",
+  "after": "  other-sdk:",
+  "command": "check",
+  "code": "E-SUBJECT-UNKNOWN"
+}

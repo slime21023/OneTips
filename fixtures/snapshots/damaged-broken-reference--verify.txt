@@ -1,0 +1,7 @@
+exit=1
+--- stdout ---
+--- stderr ---
+<ROOT>/broken-reference/skills/acme-tips/INDEX.md:18: E-LINK-BROKEN missing installed file: references/retry-with-backoff.md
+<ROOT>/broken-reference/skills/acme-tips/INDEX.md:1: E-LINK-BROKEN missing indexed reference: retry-with-backoff.md
+<ROOT>/broken-reference/skills/acme-tips/references/idempotency-keys.md:15: E-LINK-BROKEN missing installed file: retry-with-backoff.md#%E6%AA%A2%E6%9F%A5%E6%B8%85%E5%96%AE
+3 errors, 0 warnings

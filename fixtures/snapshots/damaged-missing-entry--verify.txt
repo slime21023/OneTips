@@ -1,0 +1,5 @@
+exit=1
+--- stdout ---
+--- stderr ---
+<ROOT>/missing-entry/skills/acme-tips/INDEX.md:1: E-INDEX-MISSING-ENTRY index does not list retry-with-backoff.md
+1 errors, 0 warnings

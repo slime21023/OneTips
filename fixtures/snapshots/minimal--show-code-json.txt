@@ -1,0 +1,4 @@
+exit=0
+--- stdout ---
+[{"language": "python", "status": "tested", "code": "def retry_delay(attempt: int) -> int:\n    return min(2 ** attempt, 8)\n\n\nassert [retry_delay(i) for i in range(6)] == [1, 2, 4, 8, 8, 8]\n"}, {"language": "text", "status": "unverified", "code": "## 檢查清單\n"}, {"language": "python", "status": "unverified", "code": "raise AssertionError(\"unverified fences must not run\")\n"}]
+--- stderr ---

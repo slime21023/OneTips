@@ -1,0 +1,4 @@
+exit=1
+--- stdout ---
+--- stderr ---
+onetips: <ROOT>/absent/skills/acme-tips/INDEX.md: <ROOT>/absent/skills/acme-tips/INDEX.md: expected a regular index file

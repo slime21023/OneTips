@@ -1,0 +1,4 @@
+exit=0
+--- stdout ---
+computedHash: 17537cff6a02c4f016481c17d938964835e5c68ba6716ca1d0e937bf197f6ffe
+--- stderr ---

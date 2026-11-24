@@ -1,0 +1,5 @@
+exit=1
+--- stdout ---
+--- stderr ---
+<ROOT>/invalid-empty-checklist/skills/acme-tips/references/retry-with-backoff.md:42: E-CHECKLIST-EMPTY checklist must contain a nonempty task list item
+1 errors, 0 warnings

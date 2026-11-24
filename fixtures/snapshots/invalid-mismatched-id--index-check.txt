@@ -1,0 +1,6 @@
+exit=1
+--- stdout ---
+--- stderr ---
+<ROOT>/invalid-mismatched-id/skills/acme-tips/references/idempotency-keys.md:1: E-RELATED-UNKNOWN related Tip 'retry-with-backoff' is self or unknown
+<ROOT>/invalid-mismatched-id/skills/acme-tips/references/retry-with-backoff.md:1: E-ID-FILENAME id 'other-tip' does not match filename 'retry-with-backoff.md'
+2 errors, 0 warnings

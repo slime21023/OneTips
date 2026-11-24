@@ -1,0 +1,7 @@
+{
+  "path": "skills/acme-tips/references/retry-with-backoff.md",
+  "before": "id: retry-with-backoff",
+  "after": "id: other-tip",
+  "command": "check",
+  "code": "E-ID-FILENAME"
+}

@@ -1,0 +1,5 @@
+exit=1
+--- stdout ---
+--- stderr ---
+<ROOT>/invalid-out-of-order-h2/skills/acme-tips/references/retry-with-backoff.md:14: E-SECTION-ORDER section 'Recommended Approach' is out of order
+1 errors, 0 warnings

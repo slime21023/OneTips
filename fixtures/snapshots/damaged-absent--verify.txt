@@ -1,0 +1,7 @@
+exit=1
+--- stdout ---
+--- stderr ---
+<ROOT>/absent/skills/acme-tips/SKILL.md:10: E-LINK-BROKEN missing installed file: INDEX.md
+<ROOT>/absent/skills/acme-tips/SKILL.md:15: E-LINK-BROKEN missing installed file: INDEX.md
+<ROOT>/absent/skills/acme-tips/INDEX.md:1: E-INDEX-FORMAT <ROOT>/absent/skills/acme-tips/INDEX.md: expected a regular index file
+3 errors, 0 warnings

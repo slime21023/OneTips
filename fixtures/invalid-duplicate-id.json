@@ -1,0 +1,7 @@
+{
+  "path": "skills/acme-tips/references/retry-with-backoff.md",
+  "before": "id: retry-with-backoff",
+  "after": "id: idempotency-keys",
+  "command": "check",
+  "code": "E-ID-DUPLICATE"
+}

@@ -1,0 +1,5 @@
+exit=1
+--- stdout ---
+--- stderr ---
+<ROOT>/invalid-unknown-related/skills/acme-tips/references/retry-with-backoff.md:1: E-RELATED-UNKNOWN related Tip 'other-tip' is self or unknown
+1 errors, 0 warnings

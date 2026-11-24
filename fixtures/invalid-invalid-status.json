@@ -1,0 +1,7 @@
+{
+  "path": "skills/acme-tips/references/retry-with-backoff.md",
+  "before": "status=tested",
+  "after": "status=planned",
+  "command": "check",
+  "code": "E-CODE-STATUS"
+}

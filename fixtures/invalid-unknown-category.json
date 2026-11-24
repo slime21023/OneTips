@@ -1,0 +1,7 @@
+{
+  "path": "skills/acme-tips/references/retry-with-backoff.md",
+  "before": "category: networking",
+  "after": "category: unknown-category",
+  "command": "check",
+  "code": "E-CATEGORY-UNKNOWN"
+}

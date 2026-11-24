@@ -1,0 +1,5 @@
+exit=1
+--- stdout ---
+--- stderr ---
+<ROOT>/invalid-missing-h2/skills/acme-tips/references/retry-with-backoff.md:1: E-SECTION-MISSING missing section 'Pitfalls'
+1 errors, 0 warnings

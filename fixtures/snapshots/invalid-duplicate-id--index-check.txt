@@ -1,0 +1,9 @@
+exit=1
+--- stdout ---
+--- stderr ---
+<ROOT>/invalid-duplicate-id/skills/acme-tips/references/idempotency-keys.md:1: E-ID-DUPLICATE id 'idempotency-keys' occurs more than once
+<ROOT>/invalid-duplicate-id/skills/acme-tips/references/idempotency-keys.md:1: E-RELATED-UNKNOWN related Tip 'retry-with-backoff' is self or unknown
+<ROOT>/invalid-duplicate-id/skills/acme-tips/references/retry-with-backoff.md:1: E-ID-FILENAME id 'idempotency-keys' does not match filename 'retry-with-backoff.md'
+<ROOT>/invalid-duplicate-id/skills/acme-tips/references/retry-with-backoff.md:1: E-ID-DUPLICATE id 'idempotency-keys' occurs more than once
+<ROOT>/invalid-duplicate-id/skills/acme-tips/references/retry-with-backoff.md:1: E-RELATED-UNKNOWN related Tip 'idempotency-keys' is self or unknown
+5 errors, 0 warnings

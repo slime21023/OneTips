@@ -1,0 +1,5 @@
+exit=1
+--- stdout ---
+--- stderr ---
+<ROOT>/invalid-unknown-subject/skills/acme-tips/references/retry-with-backoff.md:1: E-SUBJECT-UNKNOWN unknown subject 'other-sdk'
+1 errors, 0 warnings

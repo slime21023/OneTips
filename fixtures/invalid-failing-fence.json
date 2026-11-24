@@ -1,0 +1,7 @@
+{
+  "path": "skills/acme-tips/references/retry-with-backoff.md",
+  "before": "[1, 2, 4, 8, 8, 8]",
+  "after": "[2, 2, 4, 8, 8, 8]",
+  "command": "snippets",
+  "code": "E-SNIPPET-FAILED"
+}

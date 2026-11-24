@@ -1,0 +1,5 @@
+exit=1
+--- stdout ---
+--- stderr ---
+<ROOT>/invalid-missing-link/skills/acme-tips/references/retry-with-backoff.md:16: E-LINK-BROKEN missing installed file: missing.md
+1 errors, 0 warnings

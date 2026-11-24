@@ -1,0 +1,11 @@
+exit=0
+--- stdout ---
+id: retry-with-backoff
+summary: Cap retry attempts and delay for transient Acme SDK failures.
+category: networking
+tags: [retry]
+related: [idempotency-keys]
+applies_to:
+  acme-sdk: '>=2.0 <3.0'
+x-example: maximum-delay
+--- stderr ---

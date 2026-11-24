@@ -1,0 +1,5 @@
+exit=0
+--- stdout ---
+- [idempotency-keys](references/idempotency-keys.md) — Idempotency keys — Reuse the same idempotency key when retrying an Acme SDK request. (acme-sdk >=2.0 <3.0)
+- [retry-with-backoff](references/retry-with-backoff.md) — Retry with backoff — Cap retry attempts and delay for transient Acme SDK failures. (acme-sdk >=2.0 <3.0)
+--- stderr ---

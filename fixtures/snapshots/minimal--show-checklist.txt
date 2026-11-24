@@ -1,0 +1,6 @@
+exit=0
+--- stdout ---
+## 檢查清單
+
+- [ ] Limit both attempts and delay.
+--- stderr ---

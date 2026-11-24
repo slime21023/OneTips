@@ -1,0 +1,7 @@
+{
+  "path": "skills/acme-tips/references/retry-with-backoff.md",
+  "before": "(idempotency-keys.md)",
+  "after": "(missing.md)",
+  "command": "check",
+  "code": "E-LINK-BROKEN"
+}

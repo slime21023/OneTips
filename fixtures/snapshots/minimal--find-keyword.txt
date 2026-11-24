@@ -1,0 +1,4 @@
+exit=0
+--- stdout ---
+- [retry-with-backoff](references/retry-with-backoff.md) — Retry with backoff — Cap retry attempts and delay for transient Acme SDK failures. (acme-sdk >=2.0 <3.0)
+--- stderr ---

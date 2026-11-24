@@ -1,0 +1,5 @@
+exit=1
+--- stdout ---
+--- stderr ---
+<ROOT>/invalid-bad-skill-name/skills/acme-tips/SKILL.md:1: E-SKILL-NAME-MISMATCH expected name 'acme-tips', got 'other-tips'
+1 errors, 0 warnings

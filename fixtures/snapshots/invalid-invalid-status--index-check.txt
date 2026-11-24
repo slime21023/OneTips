@@ -1,0 +1,5 @@
+exit=1
+--- stdout ---
+--- stderr ---
+<ROOT>/invalid-invalid-status/skills/acme-tips/references/retry-with-backoff.md:22: E-CODE-STATUS expected at most one status=unverified, status=compiled or status=tested
+1 errors, 0 warnings

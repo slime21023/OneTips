@@ -1,0 +1,7 @@
+{
+  "path": "skills/acme-tips/references/retry-with-backoff.md",
+  "before": "related: [idempotency-keys]",
+  "after": "related: [other-tip]",
+  "command": "check",
+  "code": "E-RELATED-UNKNOWN"
+}

@@ -1,0 +1,7 @@
+{
+  "path": "onetips.yaml",
+  "before": "    test: python {file}\n",
+  "after": "",
+  "command": "snippets",
+  "code": "E-SNIPPET-NO-COMMAND"
+}

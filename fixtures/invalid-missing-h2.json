@@ -1,0 +1,7 @@
+{
+  "path": "skills/acme-tips/references/retry-with-backoff.md",
+  "before": "## Pitfalls",
+  "after": "### Pitfalls",
+  "command": "check",
+  "code": "E-SECTION-MISSING"
+}

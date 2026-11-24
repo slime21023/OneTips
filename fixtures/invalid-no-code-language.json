@@ -1,0 +1,7 @@
+{
+  "path": "skills/acme-tips/references/retry-with-backoff.md",
+  "before": "```text\n##",
+  "after": "```\n##",
+  "command": "check",
+  "code": "E-CODE-LANG"
+}

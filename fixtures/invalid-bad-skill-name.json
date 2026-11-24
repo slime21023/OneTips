@@ -1,0 +1,7 @@
+{
+  "path": "skills/acme-tips/SKILL.md",
+  "before": "name: acme-tips",
+  "after": "name: other-tips",
+  "command": "check",
+  "code": "E-SKILL-NAME-MISMATCH"
+}

@@ -1,0 +1,18 @@
+format: 1
+name: acme-tips
+domain: Acme SDK
+subjects:
+  acme-sdk: Acme SDK
+categories:
+  - id: networking
+    title: Networking
+sections:
+  when: When to Use
+  approach: Recommended Approach
+  pitfalls: Pitfalls
+  checklist: 檢查清單
+snippets:
+  python:
+    ext: py
+    compile: python -m py_compile {file}
+    test: python {file}

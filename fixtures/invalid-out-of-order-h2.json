@@ -1,0 +1,7 @@
+{
+  "path": "skills/acme-tips/references/retry-with-backoff.md",
+  "before": "## When to Use\n\nRetry only transient failures that are safe to repeat. See [idempotency keys](idempotency-keys.md).\n\n## Recommended Approach",
+  "after": "## Recommended Approach\n\nRetry only transient failures that are safe to repeat. See [idempotency keys](idempotency-keys.md).\n\n## When to Use",
+  "command": "check",
+  "code": "E-SECTION-ORDER"
+}

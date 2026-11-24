@@ -1,0 +1,7 @@
+{
+  "path": "skills/acme-tips/references/retry-with-backoff.md",
+  "before": "- [ ] Limit both attempts and delay.",
+  "after": "- Limit both attempts and delay.",
+  "command": "check",
+  "code": "E-CHECKLIST-EMPTY"
+}
