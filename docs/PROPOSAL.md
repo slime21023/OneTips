@@ -1,6 +1,6 @@
 # OneTips 設計提案
 
-狀態：草案 v0.1（2026-11-24）。尚未實作；本文件是實作前的規格。
+狀態：歷史設計提案 v0.1（2026-11-24）。本文件保留為 MVP 實作前的設計規格與取捨脈絡；MVP 核心功能已實作完成，正式格式規格見 [FORMAT.md](FORMAT.md)，架構設計見 [DESIGN.md](DESIGN.md)，AC-1～AC-9 實際驗收狀態與證據見 [VERIFICATION.md](VERIFICATION.md)。
 
 ## 1. 定位
 
