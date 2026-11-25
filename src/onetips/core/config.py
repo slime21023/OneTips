@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
+from typing import TypeGuard
 
 from onetips.core.errors import UsageError
 from onetips.core.section import SECTION_KEYS
@@ -29,15 +30,28 @@ class ProjectConfig:
     snippets: dict[str, SnippetRunner] = field(default_factory=dict)
 
 
+def is_slug(value: object, *, limit: int | None = None) -> TypeGuard[str]:
+    return isinstance(value, str) and bool(_KEBAB.fullmatch(value)) and (limit is None or len(value) <= limit)
+
+
+def is_path_slug(value: object) -> TypeGuard[str]:
+    return is_slug(value, limit=64) and value not in _RESERVED
+
+
+def _is_strict_int(value: object) -> TypeGuard[int]:
+    # `bool` is a subclass of `int` in Python; YAML booleans must not be accepted as integers.
+    return type(value) is int
+
+
 def slug(value: object, field: str) -> str:
-    if not isinstance(value, str) or not _KEBAB.fullmatch(value):
+    if not is_slug(value):
         raise UsageError(f"{field} must be a lowercase kebab-case identifier")
     return value
 
 
 def path_slug(value: object, field: str) -> str:
     identifier = slug(value, field)
-    if len(identifier) > 64 or identifier in _RESERVED:
+    if not is_path_slug(identifier):
         raise UsageError(f"{field} must be a portable identifier of at most 64 characters: {identifier!r}")
     return identifier
 
@@ -99,7 +113,7 @@ def _parse_snippets(data: object) -> dict[str, SnippetRunner]:
                     raise UsageError(f"snippets.{language}.{key} must be a nonempty string")
                 commands[key] = command
         timeout = entry.get("timeout", 120)
-        if type(timeout) is not int or timeout <= 0:
+        if not _is_strict_int(timeout) or timeout <= 0:
             raise UsageError(f"snippets.{language}.timeout must be a positive integer")
         snippets[language] = SnippetRunner(ext, commands.get("compile"), commands.get("test"), timeout)
     return snippets
@@ -146,7 +160,7 @@ def parse_config(data: object) -> ProjectConfig:
     if not isinstance(data, dict):
         raise UsageError("expected a YAML mapping")
     fmt = data.get("format")
-    if type(fmt) is not int or fmt != 1:
+    if not _is_strict_int(fmt) or fmt != 1:
         raise UsageError("format must be the integer 1")
     name = path_slug(data.get("name"), "name")
     domain = _line(data.get("domain"), "domain")

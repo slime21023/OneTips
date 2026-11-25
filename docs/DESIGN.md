@@ -51,9 +51,8 @@ cli → commands → adapters → core
 
 ```text
 src/onetips/
-  scaffold.py     init／new 的範本與寫入
   cli/            參數定義、分派、輸出格式、exit code 對應
-  commands/       index, check, snippets, verify, find, show；project.py 載入並驗證專案
+  commands/       scaffold（init／new）, index, check, snippets, verify, find, show；project.py 載入並驗證專案
   adapters/       fs, yamlio, config, markdown, tips, index_file, links, hashing, runner
   core/           errors, diagnostic, snippet, tip, section, config, index
     rules/        metadata, body, anchors, links, skill

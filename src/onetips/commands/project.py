@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from onetips.adapters.config import load_config
-from onetips.adapters.fs import is_link
+from onetips.adapters.fs import is_plain_dir
 from onetips.adapters.tips import read_tip_documents
 from onetips.core.config import ProjectConfig
 from onetips.core.diagnostic import Diagnostic
@@ -29,7 +29,7 @@ def load_project(root: Path) -> Project:
     skills = root / "skills"
     skill = skills / config.name
     for directory in (skills, skill, skill / "references"):
-        if is_link(directory) or not directory.is_dir():
+        if not is_plain_dir(directory):
             diagnostic = Diagnostic(directory, 1, "E-READ", "expected a plain project directory")
             return Project(root, config, skill, [], [diagnostic], False)
     documents, diagnostics = read_tip_documents(skill)

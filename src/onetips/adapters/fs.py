@@ -8,11 +8,8 @@ def is_link(path: Path) -> bool:
     return path.is_symlink() or path.is_junction()
 
 
-def contained(root: Path, path: Path) -> bool:
-    try:
-        return path.resolve().is_relative_to(root.resolve())
-    except (OSError, RuntimeError, ValueError):
-        return False
+def is_plain_dir(path: Path) -> bool:
+    return not is_link(path) and path.is_dir()
 
 
 def atomic_write(path: Path, data: bytes) -> None:

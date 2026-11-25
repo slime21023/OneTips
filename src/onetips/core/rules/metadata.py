@@ -2,9 +2,8 @@ from __future__ import annotations
 
 from collections import Counter
 
-from onetips.core.config import ProjectConfig, path_slug, slug
+from onetips.core.config import ProjectConfig, is_path_slug, is_slug
 from onetips.core.diagnostic import Diagnostic
-from onetips.core.errors import UsageError
 from onetips.core.tip import Document, TipMetadata
 
 Diagnostics = list[Diagnostic]
@@ -13,11 +12,9 @@ _KEYS = {"id", "summary", "category", "tags", "related", "applies_to"}
 
 
 def _identifier(value: object, *, portable: bool = False, limit: int | None = None) -> str | None:
-    try:
-        result = (path_slug if portable else slug)(value, "ID")
-    except UsageError:
-        return None
-    return result if limit is None or len(result) <= limit else None
+    if portable:
+        return value if is_path_slug(value) and (limit is None or len(value) <= limit) else None
+    return value if is_slug(value, limit=limit) else None
 
 
 def _single_line(value: object) -> str | None:

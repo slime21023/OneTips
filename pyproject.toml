@@ -69,7 +69,7 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "src/onetips/cli/*" = ["T201"]
-"src/onetips/scaffold.py" = ["T201", "E501"]  # generated Markdown templates are prose lines
+"src/onetips/commands/scaffold.py" = ["T201", "E501"]  # generated Markdown templates are prose lines
 "tests/*" = ["S101", "S603", "S607", "PLR2004", "ARG", "S105"]
 "scripts/*" = ["T201", "S101", "S603", "S607", "S602"]
 "src/onetips/adapters/markdown.py" = ["ARG002"]  # token handlers share one signature

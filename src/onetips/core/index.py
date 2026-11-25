@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from html import unescape
 from typing import Final
 
-from onetips.core.config import ProjectConfig
+from onetips.core.config import ProjectConfig, is_path_slug, is_slug
 from onetips.core.errors import DataError
 from onetips.core.section import SECTION_KEYS
 from onetips.core.tip import Tip
@@ -16,8 +16,6 @@ COUNT_SUFFIX: Final = " tips. Each row links to one tip in `references/`."
 TITLE_SUFFIX: Final = " Tips — Index"
 TABLE_HEADER: Final = "|ID|Title|Summary|Tags|Applies to|Snippets|"
 TABLE_DIVIDER: Final = "|---|---|---|---|---|---|"
-_SLUG = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
-_RESERVED = re.compile(r"con|prn|aux|nul|(?:com|lpt)[1-9]")
 _ROW_LINK = re.compile(r"\[([a-z0-9]+(?:-[a-z0-9]+)*)\]\(references/\1\.md\)")
 _CELL_DIVIDER = re.compile(r"(?<!\\)\|")
 _COUNT = re.compile(r"0|[1-9][0-9]*")
@@ -54,6 +52,11 @@ class _Lines:
         self.lines = text.split("\n")
         self.offset = 0
 
+    @property
+    def line(self) -> int:
+        """1-based line number of the line most recently returned by `read()`."""
+        return self.offset
+
     def read(self) -> str:
         if self.offset >= len(self.lines) - 1:
             raise CatalogError(self.offset + 1, "unexpected end of index")
@@ -63,7 +66,7 @@ class _Lines:
 
     def expect(self, text: str) -> None:
         if self.read() != text:
-            raise CatalogError(self.offset, f"expected {text!r}")
+            raise CatalogError(self.line, f"expected {text!r}")
 
     def next_is(self, text: str) -> bool:
         return not self.done() and self.lines[self.offset] == text
@@ -76,22 +79,23 @@ def _parse_row(text: str, category: str, line: int) -> IndexRow:
     fields = _CELL_DIVIDER.split(text)
     if len(fields) != 8 or fields[0] or fields[-1]:
         raise CatalogError(line, "expected six table cells bounded by pipes")
-    link = _ROW_LINK.fullmatch(fields[1])
+    _, raw_link, raw_title, raw_summary, raw_tags, raw_versions, raw_snippets, _ = fields
+    link = _ROW_LINK.fullmatch(raw_link)
     if link is None:
         raise CatalogError(line, "expected a canonical references/<id>.md link")
     tip_id = link[1]
-    if len(tip_id) > 64 or _RESERVED.fullmatch(tip_id):
+    if not is_path_slug(tip_id):
         raise CatalogError(line, "tip id is not a portable path identifier")
-    title = unescape(fields[2].replace(r"\|", "|"))
-    summary = unescape(fields[3].replace(r"\|", "|"))
+    title = unescape(raw_title.replace(r"\|", "|"))
+    summary = unescape(raw_summary.replace(r"\|", "|"))
     if not title.strip() or not summary.strip():
         raise CatalogError(line, "title and summary must be nonempty")
-    tags = tuple(fields[4].split(", "))
-    if any(len(tag) > 64 or not _SLUG.fullmatch(tag) for tag in tags):
+    tags = tuple(raw_tags.split(", "))
+    if any(not is_slug(tag, limit=64) for tag in tags):
         raise CatalogError(line, "tags must be comma-space-separated identifiers")
-    if not _SNIPPETS.fullmatch(fields[6]):
+    if not _SNIPPETS.fullmatch(raw_snippets):
         raise CatalogError(line, "invalid snippet counts")
-    versions = unescape(fields[5].replace(r"\|", "|"))
+    versions = unescape(raw_versions.replace(r"\|", "|"))
     return IndexRow(tip_id, title, summary, category, tags, versions, f"references/{tip_id}.md")
 
 
@@ -100,13 +104,13 @@ def _parse_header(lines: _Lines) -> tuple[str, int]:
     lines.expect(GENERATED_NOTICE)
     title = lines.read()
     if not title.startswith("# ") or not title.endswith(TITLE_SUFFIX) or not title[2 : -len(TITLE_SUFFIX)].strip():
-        raise CatalogError(lines.offset, "expected a domain index title")
+        raise CatalogError(lines.line, "expected a domain index title")
     lines.expect("")
     count_text = lines.read()
     count = count_text.removesuffix(COUNT_SUFFIX)
     if count == count_text or not _COUNT.fullmatch(count):
-        raise CatalogError(lines.offset, "invalid tip count")
-    return count, lines.offset
+        raise CatalogError(lines.line, "invalid tip count")
+    return count, lines.line
 
 
 def _parse_sections(lines: _Lines) -> dict[str, str]:
@@ -119,10 +123,10 @@ def _parse_sections(lines: _Lines) -> dict[str, str]:
         prefix = f"- `{key}`: "
         entry = lines.read()
         if not entry.startswith(prefix):
-            raise CatalogError(lines.offset, f"expected {key!r} section mapping")
+            raise CatalogError(lines.line, f"expected {key!r} section mapping")
         section_title = unescape(entry[len(prefix) :])
         if not section_title.strip() or section_title.splitlines() != [section_title] or section_title in section_titles:
-            raise CatalogError(lines.offset, "section titles must be nonempty, distinct single lines")
+            raise CatalogError(lines.line, "section titles must be nonempty, distinct single lines")
         sections[key] = section_title
         section_titles.add(section_title)
     return sections
@@ -132,10 +136,10 @@ def _parse_category_heading(lines: _Lines, seen: set[str]) -> str:
     lines.expect("")
     group = lines.read()
     category, separator, display = group.removeprefix("## ").partition(" — ")
-    if not group.startswith("## ") or not separator or not _SLUG.fullmatch(category) or not display.strip():
-        raise CatalogError(lines.offset, "invalid category heading")
+    if not group.startswith("## ") or not separator or not is_slug(category) or not display.strip():
+        raise CatalogError(lines.line, "invalid category heading")
     if category in seen:
-        raise CatalogError(lines.offset, f"duplicate category {category!r}")
+        raise CatalogError(lines.line, f"duplicate category {category!r}")
     return category
 
 
@@ -145,9 +149,9 @@ def _parse_table(lines: _Lines, category: str, ids: set[str]) -> list[IndexRow]:
     lines.expect(TABLE_DIVIDER)
     rows: list[IndexRow] = []
     while True:
-        row = _parse_row(lines.read(), category, lines.offset)
+        row = _parse_row(lines.read(), category, lines.line)
         if row.id in ids:
-            raise CatalogError(lines.offset, f"duplicate tip id {row.id!r}")
+            raise CatalogError(lines.line, f"duplicate tip id {row.id!r}")
         ids.add(row.id)
         rows.append(row)
         if lines.done() or lines.next_is(""):

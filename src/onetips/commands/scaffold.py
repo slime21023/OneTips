@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from onetips.adapters.config import load_config, render_config
-from onetips.adapters.fs import is_link
+from onetips.adapters.fs import is_link, is_plain_dir
 from onetips.adapters.yamlio import dump_yaml
 from onetips.core.config import ProjectConfig, default_config, path_slug
 from onetips.core.errors import UsageError
@@ -75,7 +75,7 @@ def _occupied(path: Path) -> bool:
 
 
 def _mkdir(path: Path, created: list[Path]) -> None:
-    if path.is_dir() and not is_link(path):
+    if is_plain_dir(path):
         return
     _mkdir(path.parent, created)
     path.mkdir()
@@ -144,7 +144,7 @@ def new_tip(root: Path, tip_id: str, category: str) -> Path:
     skill = skills / config.name
     references = skill / "references"
     for directory in (skills, skill, references):
-        if is_link(directory) or not directory.is_dir():
+        if not is_plain_dir(directory):
             raise UsageError(f"expected a project directory at {directory}")
 
     path = references / f"{tip_id}.md"

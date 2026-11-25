@@ -8,9 +8,11 @@ import subprocess
 import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory, TemporaryFile
+from typing import IO
 
 from onetips.core.config import ProjectConfig, SnippetRunner
 from onetips.core.diagnostic import Diagnostic
+from onetips.core.snippet import Fence
 from onetips.core.tip import Tip
 
 _ARGUMENT = re.compile(r"(?<!\S)\{(file|dir)\}(?!\S)")
@@ -35,14 +37,24 @@ def _stop(process: subprocess.Popen[bytes]) -> None:
     process.wait()
 
 
-def _execute(root: Path, source: Path, command: str, timeout: int) -> str | None:
-    env = dict(os.environ, ONETIPS_SNIPPET_FILE=str(source), ONETIPS_SNIPPET_DIR=str(source.parent))
-
+def _expand_command(command: str) -> str:
     def argument(match: re.Match[str]) -> str:
         variable = "ONETIPS_SNIPPET_" + match[1].upper()
         return f'"%{variable}%"' if os.name == "nt" else f'"${variable}"'
 
-    expanded = _ARGUMENT.sub(argument, command)
+    return _ARGUMENT.sub(argument, command)
+
+
+def _tail_output(output: IO[bytes], limit: int = 2048) -> str:
+    end = output.seek(0, os.SEEK_END)
+    output.seek(max(0, end - limit))
+    lines = output.read(limit).decode(errors="replace").strip().splitlines()
+    return f": {lines[-1]}" if lines else ""
+
+
+def _execute(root: Path, source: Path, command: str, timeout: int) -> str | None:
+    env = dict(os.environ, ONETIPS_SNIPPET_FILE=str(source), ONETIPS_SNIPPET_DIR=str(source.parent))
+    expanded = _expand_command(command)
     with TemporaryFile() as output:
         try:
             with subprocess.Popen(
@@ -62,10 +74,7 @@ def _execute(root: Path, source: Path, command: str, timeout: int) -> str | None
         except OSError as exc:
             return str(exc)
         if status:
-            end = output.seek(0, os.SEEK_END)
-            output.seek(max(0, end - 2048))
-            lines = output.read(2048).decode(errors="replace").strip().splitlines()
-            return f"exited {status}" + (f": {lines[-1]}" if lines else "")
+            return f"exited {status}{_tail_output(output)}"
     return None
 
 
@@ -78,32 +87,34 @@ def _phases(runner: SnippetRunner, status: str) -> list[tuple[str, str]] | None:
     return [*steps, ("test", runner.test)]
 
 
+def _run_fence(root: Path, scratch: Path, config: ProjectConfig, tip: Tip, fence: Fence) -> list[Diagnostic]:
+    snippet = fence.snippet
+    if snippet.status == "unverified":
+        return []
+    line = fence.start + 1
+    runner = config.snippets.get(snippet.language)
+    phases = None if runner is None else _phases(runner, snippet.status)
+    if runner is None or phases is None:
+        required = "compile" if snippet.status == "compiled" else "test"
+        return [Diagnostic(tip.path, line, "E-SNIPPET-NO-COMMAND", f"{snippet.language} needs a {required} command")]
+    path = scratch / tip.metadata.id / f"{line}.{runner.ext}"
+    try:
+        path.parent.mkdir(exist_ok=True)
+        path.write_text(snippet.code, encoding="utf-8", newline="\n")
+        for phase, command in phases:
+            failure = _execute(root, path, command, runner.timeout)
+            if failure is not None:
+                return [Diagnostic(tip.path, line, "E-SNIPPET-FAILED", f"{phase}: {failure}")]
+    except OSError as exc:
+        return [Diagnostic(tip.path, line, "E-SNIPPET-FAILED", str(exc))]
+    return []
+
+
 def run_snippets(root: Path, config: ProjectConfig, tips: list[Tip]) -> list[Diagnostic]:
     diagnostics: list[Diagnostic] = []
-    with TemporaryDirectory(prefix="onetips snippets ") as scratch:
+    with TemporaryDirectory(prefix="onetips snippets ") as scratch_dir:
+        scratch = Path(scratch_dir).resolve()
         for tip in tips:
             for fence in tip.document.fences:
-                snippet = fence.snippet
-                if snippet.status == "unverified":
-                    continue
-                line = fence.start + 1
-                runner = config.snippets.get(snippet.language)
-                phases = None if runner is None else _phases(runner, snippet.status)
-                if runner is None or phases is None:
-                    required = "compile" if snippet.status == "compiled" else "test"
-                    diagnostics.append(
-                        Diagnostic(tip.path, line, "E-SNIPPET-NO-COMMAND", f"{snippet.language} needs a {required} command")
-                    )
-                    continue
-                path = Path(scratch).resolve() / tip.metadata.id / f"{line}.{runner.ext}"
-                try:
-                    path.parent.mkdir(exist_ok=True)
-                    path.write_text(snippet.code, encoding="utf-8", newline="\n")
-                    for phase, command in phases:
-                        failure = _execute(root, path, command, runner.timeout)
-                        if failure is not None:
-                            diagnostics.append(Diagnostic(tip.path, line, "E-SNIPPET-FAILED", f"{phase}: {failure}"))
-                            break
-                except OSError as exc:
-                    diagnostics.append(Diagnostic(tip.path, line, "E-SNIPPET-FAILED", str(exc)))
+                diagnostics.extend(_run_fence(root, scratch, config, tip, fence))
     return diagnostics

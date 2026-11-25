@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from urllib.parse import unquote
 
-from onetips.adapters.fs import is_link
+from onetips.adapters.fs import is_link, is_plain_dir
 from onetips.adapters.hashing import is_excluded
 from onetips.adapters.index_file import read_catalog
 from onetips.adapters.markdown import read_document
@@ -12,7 +12,7 @@ from onetips.core.index import Catalog, CatalogError
 from onetips.core.rules.anchors import heading_anchors
 from onetips.core.rules.links import classify_link, leaves_scope
 from onetips.core.rules.skill import compare_index, validate_skill_document
-from onetips.core.tip import Document
+from onetips.core.tip import Document, Link
 
 
 class _Links:
@@ -44,39 +44,41 @@ class _Links:
             self.anchors[path] = set() if document is None else heading_anchors(document)
         return self.anchors[path]
 
-    def check(self, document: Document) -> set[Path]:
-        linked: set[Path] = set()
-        for link in document.links:
-            dest = link.destination
-            try:
-                info = classify_link(dest)
-                if info is None:
-                    continue
-                escaped = info.escapes
-                raw = document.path.parent / info.path if info.path else document.path
-                if not escaped:
-                    # Check lexical and resolved paths, even if the target is missing.
-                    escaped = leaves_scope(raw.relative_to(self.root).parts)
-                target = raw.resolve() if not escaped else raw
-                if escaped or not target.is_relative_to(self.root):
-                    self.diagnostics.append(
-                        Diagnostic(document.path, link.line, "E-LINK-ESCAPES-SKILL", f"link leaves its scope: {dest}"),
-                    )
-                    continue
-                unavailable = self.installed and (
-                    is_excluded(target.relative_to(self.root)) or is_excluded(raw.relative_to(self.root))
+    def _check_link(self, document: Document, link: Link) -> Path | None:
+        dest = link.destination
+        try:
+            info = classify_link(dest)
+            if info is None:
+                return None
+            escaped = info.escapes
+            raw = document.path.parent / info.path if info.path else document.path
+            if not escaped:
+                # Check lexical and resolved paths, even if the target is missing.
+                escaped = leaves_scope(raw.relative_to(self.root).parts)
+            target = raw.resolve() if not escaped else raw
+            if escaped or not target.is_relative_to(self.root):
+                self.diagnostics.append(
+                    Diagnostic(document.path, link.line, "E-LINK-ESCAPES-SKILL", f"link leaves its scope: {dest}"),
                 )
-                if unavailable or not target.is_file():
-                    self.diagnostics.append(
-                        Diagnostic(document.path, link.line, "E-LINK-BROKEN", f"missing installed file: {dest}"),
-                    )
-                    continue
-                linked.add(target)
-                if info.fragment and target.suffix.lower() == ".md" and info.fragment not in self._anchor_set(target):
-                    self.diagnostics.append(Diagnostic(document.path, link.line, "E-LINK-ANCHOR", f"unknown anchor: {dest}"))
-            except (OSError, RuntimeError, ValueError) as exc:
-                self.diagnostics.append(Diagnostic(document.path, link.line, "E-LINK-BROKEN", f"{dest}: {exc}"))
-        return linked
+                return None
+            unavailable = self.installed and (
+                is_excluded(target.relative_to(self.root)) or is_excluded(raw.relative_to(self.root))
+            )
+            if unavailable or not target.is_file():
+                self.diagnostics.append(
+                    Diagnostic(document.path, link.line, "E-LINK-BROKEN", f"missing installed file: {dest}"),
+                )
+                return None
+            if info.fragment and target.suffix.lower() == ".md" and info.fragment not in self._anchor_set(target):
+                self.diagnostics.append(Diagnostic(document.path, link.line, "E-LINK-ANCHOR", f"unknown anchor: {dest}"))
+        except (OSError, RuntimeError, ValueError) as exc:
+            self.diagnostics.append(Diagnostic(document.path, link.line, "E-LINK-BROKEN", f"{dest}: {exc}"))
+            return None
+        else:
+            return target
+
+    def check(self, document: Document) -> set[Path]:
+        return {target for link in document.links if (target := self._check_link(document, link)) is not None}
 
 
 def validate_readme(root: Path, skill: Path) -> list[Diagnostic]:
@@ -124,7 +126,7 @@ def _load_catalog(root: Path, catalog: Catalog | None, diagnostics: list[Diagnos
 
 def _check_references(links: _Links, root: Path, catalog: Catalog | None) -> None:
     references = root / "references"
-    if is_link(references) or (references.exists() and not references.is_dir()):
+    if (is_link(references) or references.exists()) and not is_plain_dir(references):
         links.diagnostics.append(Diagnostic(references, 1, "E-READ", "expected a plain references directory"))
         return
     actual = set(references.glob("*.md")) if references.is_dir() else set()

@@ -2,33 +2,13 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from onetips.adapters.fs import is_link
-from onetips.adapters.markdown import read_document
+from onetips.adapters.tips import read_indexed_tip
 from onetips.commands._query import load_catalog, to_json
 from onetips.core.errors import DataError
-from onetips.core.index import IndexRow
 from onetips.core.rules.metadata import validate_metadata
 from onetips.core.section import select_fences, select_section
 from onetips.core.snippet import Fence
 from onetips.core.tip import Document
-
-
-def _tip_document(skill: Path, row: IndexRow) -> Document:
-    path = skill / row.path
-    try:
-        root = skill.resolve(strict=True)
-        references = root / "references"
-        candidate = root / row.path
-        if is_link(references) or not references.is_dir():
-            raise DataError(f"{references}: expected a plain references directory")
-        resolved = candidate.resolve(strict=True)
-        if not resolved.is_relative_to(references) or resolved.name != f"{row.id}.md":
-            raise DataError(f"{path}: expected the indexed Tip inside references/")
-        if not resolved.is_file():
-            raise DataError(f"{path}: expected a regular Tip file")
-        return read_document(resolved)
-    except (OSError, RuntimeError, UnicodeError) as exc:
-        raise DataError(f"{path}: {exc}") from exc
 
 
 def _metadata(document: Document, as_json: bool) -> str:
@@ -79,7 +59,7 @@ def show(
     row = next((row for row in catalog.rows if row.id == tip_id), None)
     if row is None:
         raise DataError(f"{skill / 'INDEX.md'}: no indexed Tip {tip_id!r}")
-    document = _tip_document(skill, row)
+    document = read_indexed_tip(skill, row)
     if metadata:
         return _metadata(document, as_json)
 

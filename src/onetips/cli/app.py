@@ -10,10 +10,10 @@ from onetips.cli.parser import build_parser
 from onetips.commands import check, index, snippets, verify
 from onetips.commands.find import find
 from onetips.commands.result import CommandResult
+from onetips.commands.scaffold import init_project, new_tip
 from onetips.commands.show import show
 from onetips.core.diagnostic import Diagnostic
 from onetips.core.errors import ConfigError, DataError, UsageError
-from onetips.scaffold import init_project, new_tip
 
 
 def _validate_show(parser: argparse.ArgumentParser, args: argparse.Namespace) -> None:

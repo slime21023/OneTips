@@ -8,7 +8,11 @@ _STRIPPED_CATEGORIES = {"No", "Pe", "Pf", "Pi", "Ps", "Po", "Pd"}
 
 
 def heading_slug(title: str) -> str:
-    """GitHub-style heading slug using CPython's Unicode character database."""
+    """GitHub-style heading slug using CPython's Unicode character database.
+
+    Keeps spaces (as `-`), hyphens, letters, and remaining non-symbol/control/separator
+    characters (excluding Unicode categories starting with S/C/Z and punctuation/other-number).
+    """
     return "".join(
         "-" if char == " " else char
         for char in title.lower()
