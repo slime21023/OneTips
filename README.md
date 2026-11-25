@@ -12,7 +12,9 @@ OneTips 本身不提供任何特定技術的教學內容。領域、適用版本
 
 框架採用 Python + uv 開發，名稱統一為 OneTips：PyPI 發行名稱、Python 匯入套件與 CLI 指令皆為 `onetips`（尚未發布）。查詢核心須通過 mypyc 編譯與行為一致性驗證；這是框架的開發要求，不是 skill 的使用條件。
 
-> **狀態**：MVP 開發版，尚未發布到 PyPI。參考 [格式規格](docs/FORMAT.md)、[結構與設計原理](docs/DESIGN.md)與[設計提案](docs/PROPOSAL.md)。
+> **狀態**：MVP 開發版，尚未發布到 PyPI。
+> - **使用說明與排查手冊**：見 [使用指南（`guide/`）](guide/index.md)（[作者流程](guide/authoring.md)、[安裝與查閱](guide/installing.md)、[格式速查](guide/format-reference.md)、[疑難排查](guide/troubleshooting.md)）。
+> - **開發規格與驗收狀態**：見[格式規格](docs/FORMAT.md)、[結構與設計原理](docs/DESIGN.md)、[驗收狀態總表](docs/VERIFICATION.md)與[設計提案](docs/PROPOSAL.md)。
 
 ## 建立第一篇 Tip
 

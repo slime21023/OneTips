@@ -7,3 +7,5 @@ __pycache__/
 *.so
 *.pyd
 .ruff_cache/
+site/
+.cache/

@@ -1,0 +1,37 @@
+[project]
+site_name = "OneTips 使用指南"
+site_description = "用一份 Markdown 維護技術 Tips：人在 GitHub 直接讀，Coding Agent 按需只載入需要的章節。"
+docs_dir = "guide"
+site_dir = "site"
+repo_url = "https://github.com/slime21023/OneTips"
+repo_name = "slime21023/OneTips"
+
+nav = [
+  { "認識 OneTips" = "index.md" },
+  { "建立與維護 Tips" = "authoring.md" },
+  { "安裝與查閱（含無 CLI 流程）" = "installing.md" },
+  { "格式速查" = "format-reference.md" },
+  { "常見問題與排查" = "troubleshooting.md" },
+]
+
+[project.theme]
+variant = "modern"
+language = "zh-Hant"
+features = [
+  "navigation.instant",
+  "navigation.sections",
+  "navigation.top",
+  "search.suggest",
+  "search.highlight",
+  "content.code.copy",
+]
+
+[[project.theme.palette]]
+scheme = "default"
+toggle.icon = "lucide/moon"
+toggle.name = "切換深色模式"
+
+[[project.theme.palette]]
+scheme = "slate"
+toggle.icon = "lucide/sun"
+toggle.name = "切換淺色模式"
