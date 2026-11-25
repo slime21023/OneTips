@@ -48,3 +48,11 @@ jobs:
       - name: Verify copies and locks with pinned skills installer
         if: runner.os == 'Linux'
         run: uv run --locked python scripts/acceptance.py
+      - name: Verify examples/typescript-tips
+        if: runner.os == 'Linux'
+        working-directory: examples/typescript-tips
+        run: |
+          uv run --project ../.. --locked onetips index --check
+          uv run --project ../.. --locked onetips check
+          uv run --project ../.. --locked onetips snippets
+          uv run --project ../.. --locked onetips verify skills/typescript-tips

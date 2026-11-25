@@ -1,0 +1,25 @@
+format: 1
+name: typescript-tips
+domain: TypeScript
+subjects:
+  typescript: TypeScript
+  node: Node.js
+  bun: Bun
+categories:
+  - id: architecture
+    title: Architecture
+  - id: templates
+    title: Thin Templates
+  - id: style
+    title: Code Style
+sections:
+  when: When to Use
+  approach: Recommended Approach
+  pitfalls: Pitfalls
+  checklist: Checklist
+snippets:
+  ts:
+    ext: ts
+    compile: bun build {file} --outdir {dir} --target bun
+    test: bun {file}
+    timeout: 60
