@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import difflib
 import re
 from collections import Counter
 from dataclasses import dataclass
@@ -251,3 +252,14 @@ def render_index(config: ProjectConfig, tips: list[Tip]) -> str:
             )
             lines.append("|" + "|".join(fields) + "|")
     return "\n".join(lines) + "\n"
+
+
+def index_diff(actual: bytes | None, expected: bytes, fromfile: str) -> str:
+    return "".join(
+        difflib.unified_diff(
+            (actual or b"").decode("utf-8", errors="replace").splitlines(keepends=True),
+            expected.decode("utf-8").splitlines(keepends=True),
+            fromfile=fromfile,
+            tofile="generated INDEX.md",
+        )
+    )

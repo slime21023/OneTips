@@ -1,43 +1,34 @@
 from __future__ import annotations
 
-import difflib
 from pathlib import Path
 
-from onetips.adapters.fs import atomic_write, is_link
-from onetips.commands.project import Project, load_project
+from onetips.adapters.fs import is_link
+from onetips.adapters.index_file import read_index_bytes, write_index_if_changed
+from onetips.commands.project import load_project
 from onetips.commands.result import CommandResult
 from onetips.core.diagnostic import Diagnostic, has_errors
-from onetips.core.index import render_index
+from onetips.core.index import index_diff, render_index
 
 
-def freshness(project: Project, *, write: bool, diff: bool) -> tuple[list[Diagnostic], str]:
-    """Compare (or rewrite) INDEX.md against the generated index."""
-    index_path = project.skill / "INDEX.md"
-    diagnostics: list[Diagnostic] = []
-    output = ""
+def _check_freshness(index_path: Path, expected: bytes) -> tuple[list[Diagnostic], str]:
+    if is_link(index_path):
+        return [], ""
     try:
-        expected = render_index(project.config, project.tips).encode("utf-8")
-        try:
-            actual = index_path.read_bytes() if not is_link(index_path) else None
-        except FileNotFoundError:
-            actual = None
-        if write:
-            if expected != actual:
-                atomic_write(index_path, expected)
-        elif expected != actual and not is_link(index_path):
-            diagnostics.append(Diagnostic(index_path, 1, "E-INDEX-STALE", "regenerate with onetips index"))
-            if diff:
-                output = "".join(
-                    difflib.unified_diff(
-                        (actual or b"").decode("utf-8", errors="replace").splitlines(keepends=True),
-                        expected.decode("utf-8").splitlines(keepends=True),
-                        fromfile=str(index_path),
-                        tofile="generated INDEX.md",
-                    )
-                )
+        actual = read_index_bytes(index_path)
     except OSError as exc:
-        diagnostics.append(Diagnostic(index_path, 1, "E-READ", str(exc)))
-    return diagnostics, output
+        return [Diagnostic(index_path, 1, "E-READ", str(exc))], ""
+    if actual == expected:
+        return [], ""
+    diagnostic = Diagnostic(index_path, 1, "E-INDEX-STALE", "regenerate with onetips index")
+    return [diagnostic], index_diff(actual, expected, str(index_path))
+
+
+def _update_index(index_path: Path, expected: bytes) -> list[Diagnostic]:
+    try:
+        write_index_if_changed(index_path, expected)
+    except OSError as exc:
+        return [Diagnostic(index_path, 1, "E-READ", str(exc))]
+    return []
 
 
 def run(root: Path, *, check: bool) -> CommandResult:
@@ -53,6 +44,10 @@ def run(root: Path, *, check: bool) -> CommandResult:
         return CommandResult(diagnostics)
     output = ""
     if tips_valid:
-        found, output = freshness(project, write=not check, diff=True)
-        diagnostics.extend(found)
+        expected = render_index(project.config, project.tips).encode("utf-8")
+        if check:
+            found, output = _check_freshness(index_path, expected)
+            diagnostics.extend(found)
+        else:
+            diagnostics.extend(_update_index(index_path, expected))
     return CommandResult(diagnostics, output)
