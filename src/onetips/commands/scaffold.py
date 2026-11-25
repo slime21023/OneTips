@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from onetips.adapters.config import load_config, render_config
-from onetips.adapters.fs import is_link, is_plain_dir
+from onetips.adapters.fs import create_files, is_link, is_occupied, is_plain_dir
 from onetips.adapters.yamlio import dump_yaml
 from onetips.core.config import ProjectConfig, default_config, path_slug
 from onetips.core.errors import UsageError
@@ -70,38 +70,19 @@ Without the CLI, use the index and Markdown directly. Do not install tools just 
     )
 
 
-def _occupied(path: Path) -> bool:
-    return is_link(path) or path.exists()
-
-
-def _mkdir(path: Path, created: list[Path]) -> None:
-    if is_plain_dir(path):
-        return
-    _mkdir(path.parent, created)
-    path.mkdir()
-    created.append(path)
-
-
-def _write(path: Path, text: str, created: list[Path]) -> None:
-    with path.open("x", encoding="utf-8", newline="\n") as file:
-        created.append(path)
-        file.write(text)
-
-
-def _cleanup(files: list[Path], dirs: list[Path], error: OSError) -> UsageError:
-    failures: list[str] = []
-    for path in reversed(files):
-        try:
-            path.unlink(missing_ok=True)
-        except OSError as exc:
-            failures.append(str(exc))
-    for path in reversed(dirs):
-        try:
-            path.rmdir()
-        except OSError as exc:
-            failures.append(str(exc))
-    detail = f"; cleanup failed: {'; '.join(failures)}" if failures else ""
-    return UsageError(f"{error}{detail}")
+def _tip_draft(tip_id: str, category: str, config: ProjectConfig) -> str:
+    header = _front_matter(
+        {
+            "id": tip_id,
+            "summary": "",
+            "category": category,
+            "tags": [],
+            "related": [],
+            "applies_to": {},
+        }
+    )
+    headings = "\n\n".join(f"## {config.sections[key]}" for key in SECTION_KEYS)
+    return f"{header}\n#\n\n{headings}\n\n- [ ]\n"
 
 
 def init_project(root: Path, name: str) -> Path:
@@ -119,18 +100,11 @@ def init_project(root: Path, name: str) -> Path:
     conflicts = [path for path in directories if is_link(path) or (path.exists() and not path.is_dir())]
     if not root.exists():
         conflicts[:0] = [path for path in root.parents if path.exists() and not path.is_dir()]
-    conflicts.extend(path for path in contents if not any(parent in conflicts for parent in path.parents) and _occupied(path))
+    conflicts.extend(path for path in contents if not any(parent in conflicts for parent in path.parents) and is_occupied(path))
     if conflicts:
         raise UsageError("conflicting paths: " + ", ".join(str(path) for path in conflicts))
 
-    files: list[Path] = []
-    dirs: list[Path] = []
-    try:
-        _mkdir(references, dirs)
-        for path, text in contents.items():
-            _write(path, text, files)
-    except OSError as exc:
-        raise _cleanup(files, dirs, exc) from exc
+    create_files(contents, mkdir=references)
     return root
 
 
@@ -148,22 +122,7 @@ def new_tip(root: Path, tip_id: str, category: str) -> Path:
             raise UsageError(f"expected a project directory at {directory}")
 
     path = references / f"{tip_id}.md"
-    if _occupied(path):
+    if is_occupied(path):
         raise UsageError(f"conflicting path: {path}")
-    header = _front_matter(
-        {
-            "id": tip_id,
-            "summary": "",
-            "category": category,
-            "tags": [],
-            "related": [],
-            "applies_to": {},
-        }
-    )
-    headings = "\n\n".join(f"## {config.sections[key]}" for key in SECTION_KEYS)
-    files: list[Path] = []
-    try:
-        _write(path, f"{header}\n#\n\n{headings}\n\n- [ ]\n", files)
-    except OSError as exc:
-        raise _cleanup(files, [], exc) from exc
+    create_files({path: _tip_draft(tip_id, category, config)})
     return path
